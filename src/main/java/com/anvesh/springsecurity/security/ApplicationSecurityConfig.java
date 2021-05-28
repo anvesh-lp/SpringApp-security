@@ -2,7 +2,7 @@ package com.anvesh.springsecurity.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -12,11 +12,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
-import static com.anvesh.springsecurity.security.ApplicationUserPermissions.COURSE_WRITE;
 import static com.anvesh.springsecurity.security.ApplicationUserRoles.*;
 
 @EnableWebSecurity
 @Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true)/* To enable annotation based authorization */
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder encoder;
@@ -33,11 +33,16 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "index", "home")
                 .permitAll()
 //               Only users who are students can see all the list of student
-                .antMatchers("/get/*").hasRole(STUDENT.name())
+
+/*
+                 .antMatchers("/get/*").hasRole(STUDENT.name())
                 .antMatchers(HttpMethod.DELETE, "/management/api/v1/student/").hasAnyAuthority(COURSE_WRITE.getPermission())
                 .antMatchers(HttpMethod.POST, "/management/api/v1/student/").hasAnyAuthority(COURSE_WRITE.getPermission())
                 .antMatchers(HttpMethod.PUT, "/management/api/v1/student/").hasAnyAuthority(COURSE_WRITE.getPermission())
                 .antMatchers(HttpMethod.GET, "/management/api/v1/student/").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
+
+                */
+
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -60,7 +65,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorities(ADMIN.getAuthorities())
                 .build();
         UserDetails adminTrainee = User.builder()
-                .username("anvesh")
+                .username("anveshTrainee")
                 .password(encoder.encode("1234"))
 //                .roles(ADMIN_TRAINEE.name())
                 .authorities(ADMINTRAINEE.getAuthorities())
