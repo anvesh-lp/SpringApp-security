@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("management/api/v1/students/")
+@RequestMapping("management/api/v1/students")
 public class StudentManagementController {
 
     private final List<Student> studentList=new ArrayList<>(List.of(
@@ -25,7 +25,7 @@ public class StudentManagementController {
         return studentList;
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('Student:read')")
     public  Student getStudent(@PathVariable String id){
         return studentList.stream()

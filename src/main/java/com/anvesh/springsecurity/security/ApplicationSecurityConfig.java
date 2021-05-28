@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.anvesh.springsecurity.security.ApplicationUserRoles.*;
 
 @EnableWebSecurity
@@ -28,12 +30,14 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
+        http.
+                csrf().disable()
+                .authorizeRequests()
 //                Show index page to everyone irrespective of user
+
                 .antMatchers("/", "index", "home")
                 .permitAll()
 //               Only users who are students can see all the list of student
-
 /*
                  .antMatchers("/get/*").hasRole(STUDENT.name())
                 .antMatchers(HttpMethod.DELETE, "/management/api/v1/student/").hasAnyAuthority(COURSE_WRITE.getPermission())
@@ -42,11 +46,17 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/management/api/v1/student/").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
 
                 */
-
                 .anyRequest()
                 .authenticated()
                 .and()
-                .httpBasic();
+//                .httpBasic();
+                .formLogin().loginPage("/login").permitAll()
+//                on successful login redirect to this page
+                .defaultSuccessUrl("/courses")
+                .and()
+//                To Extend user session
+                .rememberMe().tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21))
+                .key("something very secured");
     }
 
     @Override
