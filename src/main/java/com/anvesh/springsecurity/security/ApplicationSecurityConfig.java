@@ -21,6 +21,8 @@ import static com.anvesh.springsecurity.security.ApplicationUserRoles.*;
 @EnableGlobalMethodSecurity(prePostEnabled = true)/* To enable annotation based authorization */
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private static final String LOGIN_URL = "/login";
+    private static final String LOGOUT_URL = "/logout";
     private final PasswordEncoder encoder;
 
     public ApplicationSecurityConfig(PasswordEncoder encoder) {
@@ -49,14 +51,20 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()
                 .authenticated()
                 .and()
-//                .httpBasic();
-                .formLogin().loginPage("/login").permitAll()
-//                on successful login redirect to this page
+                .formLogin()        //on successful login redirect to this page
+                .loginPage(LOGIN_URL).permitAll()
                 .defaultSuccessUrl("/courses")
                 .and()
-//                To Extend user session
-                .rememberMe().tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21))
-                .key("something very secured");
+                .rememberMe() /*To Extend user session*/
+                .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21))
+                .key("something very secured")
+                .and()
+                .logout()
+                .logoutUrl(LOGOUT_URL)
+                .logoutSuccessUrl(LOGIN_URL)
+                .deleteCookies("JSESSIONID", "remember-me")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true);
     }
 
     @Override
