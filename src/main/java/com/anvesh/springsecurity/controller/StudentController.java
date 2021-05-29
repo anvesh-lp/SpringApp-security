@@ -7,13 +7,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.management.RuntimeMBeanException;
 import java.util.ArrayList;
 import java.util.List;
 
 
 @RestController
-@RequestMapping("get/")
+@RequestMapping("get")
 public class StudentController {
 
     private final List<Student> studentList=new ArrayList<>(List.of(
@@ -21,7 +20,7 @@ public class StudentController {
             new Student("2","Ganesh")
     ));
 
-    @GetMapping("{id}")
+    @GetMapping(path = "/{id}")
     public Student getStudent(@PathVariable String id){
         return studentList.stream()
                 .filter(student -> student.getId().equals(id))
