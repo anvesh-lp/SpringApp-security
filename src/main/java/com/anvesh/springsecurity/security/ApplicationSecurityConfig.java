@@ -1,20 +1,17 @@
 package com.anvesh.springsecurity.security;
 
+import com.anvesh.springsecurity.auth.ApplicationUSerService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import java.util.concurrent.TimeUnit;
-
-import static com.anvesh.springsecurity.security.ApplicationUserRoles.*;
 
 @EnableWebSecurity
 @Configuration
@@ -24,9 +21,11 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String LOGIN_URL = "/login";
     private static final String LOGOUT_URL = "/logout";
     private final PasswordEncoder encoder;
+    private final ApplicationUSerService applicationUSerService;
 
-    public ApplicationSecurityConfig(PasswordEncoder encoder) {
+    public ApplicationSecurityConfig(PasswordEncoder encoder, ApplicationUSerService applicationUSerService) {
         this.encoder = encoder;
+        this.applicationUSerService = applicationUSerService;
     }
 
 
@@ -68,26 +67,15 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(authenticationProvider());
+    }
+
     @Bean
-    protected UserDetailsService userDetailsService() {
-        UserDetails ganesh = User.builder()
-                .username("ganesh")
-                .password(encoder.encode("1234"))
-//                .roles(STUDENT.name())
-                .authorities(STUDENT.getAuthorities())
-                .build();
-        UserDetails anvesh = User.builder()
-                .username("anvesh")
-                .password(encoder.encode("1234"))
-//                .roles(ADMIN.name())
-                .authorities(ADMIN.getAuthorities())
-                .build();
-        UserDetails adminTrainee = User.builder()
-                .username("anveshTrainee")
-                .password(encoder.encode("1234"))
-//                .roles(ADMIN_TRAINEE.name())
-                .authorities(ADMINTRAINEE.getAuthorities())
-                .build();
-        return new InMemoryUserDetailsManager(ganesh, anvesh, adminTrainee);
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(encoder);
+        provider.setUserDetailsService(applicationUSerService);
+        return provider;
     }
 }
